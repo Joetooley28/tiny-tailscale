@@ -2,7 +2,7 @@
 
 Minimal, stripped-down [Tailscale](https://tailscale.com/) combined binaries — auto-built from upstream stable releases.
 
-This fork adds no source changes to tailscale. It provides a CI pipeline that builds optimized single-binary releases using tailscale's own `cmd/featuretags --min` tool to strip unused features while keeping everything needed for embedded Linux deployments (routers, cellular modems, IoT).
+This repo contains no Tailscale source code — only a CI pipeline and this README. A GitHub Actions workflow automatically builds optimized single-binary releases from upstream stable tags using tailscale's own `cmd/featuretags --min` tool to strip unused features while keeping everything needed for embedded Linux deployments (routers, cellular modems, IoT).
 
 ## Downloads
 
@@ -153,7 +153,7 @@ For OpenWrt/embedded systems, these binaries are designed to be packaged into `.
 
 ## Upstream
 
-This fork tracks [tailscale/tailscale](https://github.com/tailscale/tailscale). No source code is modified — only this README and the CI workflow are added.
+This repo is a fork of [tailscale/tailscale](https://github.com/tailscale/tailscale) used purely as a CI and release host. No source code is stored here — the workflow fetches upstream tags directly at build time. This repo contains only the CI workflow, this README, and the upstream license.
 
 - **Issues with tailscale itself** → [tailscale/tailscale issues](https://github.com/tailscale/tailscale/issues)
 - **Issues with the tiny builds** → [tiny-tailscale issues](https://github.com/iamromulan/tiny-tailscale/issues)
