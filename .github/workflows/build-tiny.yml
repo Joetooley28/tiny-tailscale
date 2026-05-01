@@ -1,0 +1,211 @@
+name: Build Tiny Tailscale
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to build (e.g. v1.96.4). Leave empty for latest stable.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      should_build: ${{ steps.check.outputs.should_build }}
+    steps:
+      - name: Check for new upstream stable release
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Get latest stable tag from upstream (even minor = stable)
+          LATEST=$(git ls-remote --tags https://github.com/tailscale/tailscale.git | \
+            grep -oP 'refs/tags/v\K[0-9]+\.[0-9]+\.[0-9]+$' | \
+            awk -F. '$2 % 2 == 0' | \
+            sort -V | tail -1)
+
+          if [ -z "$LATEST" ]; then
+            echo "No stable version found"
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Latest upstream stable: v${LATEST}"
+
+          EXISTING=$(gh release view "v${LATEST}" \
+            --repo "${{ github.repository }}" \
+            --json tagName -q .tagName 2>/dev/null || echo "")
+
+          if [ "v${LATEST}" = "${EXISTING}" ]; then
+            echo "Already released v${LATEST}"
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "New version: v${LATEST}"
+            echo "version=v${LATEST}" >> "$GITHUB_OUTPUT"
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: check-version
+    if: needs.check-version.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: 386
+            goos: linux
+            goarch: 386
+            goextra: ""
+          - arch: amd64
+            goos: linux
+            goarch: amd64
+            goextra: ""
+          - arch: arm
+            goos: linux
+            goarch: arm
+            goextra: ""
+          - arch: arm64
+            goos: linux
+            goarch: arm64
+            goextra: ""
+          - arch: geode
+            goos: linux
+            goarch: 386
+            goextra: "GO386=softfloat"
+          - arch: mips
+            goos: linux
+            goarch: mips
+            goextra: "GOMIPS=softfloat"
+          - arch: mips64
+            goos: linux
+            goarch: mips64
+            goextra: ""
+          - arch: mips64le
+            goos: linux
+            goarch: mips64le
+            goextra: ""
+          - arch: mipsle
+            goos: linux
+            goarch: mipsle
+            goextra: "GOMIPS=softfloat"
+          - arch: riscv64
+            goos: linux
+            goarch: riscv64
+            goextra: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch upstream tags and checkout release
+        run: |
+          git remote add upstream https://github.com/tailscale/tailscale.git || true
+          git fetch upstream --tags
+          git checkout "${{ needs.check-version.outputs.version }}"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Generate version info
+        id: version
+        run: |
+          eval $(CGO_ENABLED=0 go run ./cmd/mkversion)
+          echo "long=${VERSION_LONG}" >> "$GITHUB_OUTPUT"
+          echo "short=${VERSION_SHORT}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate build tags
+        id: tags
+        run: |
+          TAGS=$(CGO_ENABLED=0 go run ./cmd/featuretags \
+            --min \
+            --add=cli,ssh,serve,taildrop,advertiseexitnode,useexitnode,advertiseroutes,useroutes,doctor,syspolicy,cliconndiag,colorable,relayserver,osrouter,health,portmapper,iptables,listenrawdisco,cachenetmap,wakeonlan,gro,linkspeed,tundevstats)
+          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
+          echo "Build tags: ${TAGS}"
+
+      - name: Build combined binary
+        run: |
+          export CGO_ENABLED=0
+          export GOOS=${{ matrix.goos }}
+          export GOARCH=${{ matrix.goarch }}
+          if [ -n "${{ matrix.goextra }}" ]; then
+            export ${{ matrix.goextra }}
+          fi
+          go build -o tailscaled -trimpath \
+            -tags "${{ steps.tags.outputs.tags }}" \
+            -ldflags "-s -w \
+              -X tailscale.com/version.longStamp=${{ steps.version.outputs.long }} \
+              -X tailscale.com/version.shortStamp=${{ steps.version.outputs.short }}" \
+            ./cmd/tailscaled
+
+      - name: Package
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          VERSION="${VERSION#v}"
+          DIR="tiny-tailscale_${VERSION}_${{ matrix.arch }}"
+          mkdir "$DIR"
+          mv tailscaled "$DIR/"
+          ln -s tailscaled "$DIR/tailscale"
+          tar czf "${DIR}.tgz" "$DIR"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiny-tailscale-${{ matrix.arch }}
+          path: tiny-tailscale_*.tgz
+
+  release:
+    needs: [check-version, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: tiny-tailscale-*
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.check-version.outputs.version }}
+        run: |
+          VERSION_NUM="${VERSION#v}"
+          gh release create "${VERSION}" \
+            --repo "${{ github.repository }}" \
+            --title "tiny-tailscale ${VERSION_NUM}" \
+            --notes "## tiny-tailscale ${VERSION_NUM}
+
+          Stripped combined binary built from upstream [tailscale ${VERSION}](https://github.com/tailscale/tailscale/releases/tag/${VERSION}).
+
+          **Single binary** — symlink or rename to \`tailscale\` for CLI mode, or set \`TS_BE_CLI=1\`.
+
+          ### Included (23 features + auto-resolved dependencies)
+          cli, ssh, serve/funnel, taildrop, exit node (advertise + use), route advertising + use, doctor, syspolicy, cliconndiag, colorable, relayserver, osrouter, health, portmapper, iptables, listenrawdisco, cachenetmap, wakeonlan, gro, linkspeed, tundevstats
+
+          ### Stripped
+          Everything else — aws, kube, bird, webclient, debugeventbus, dns, capture, tap, tpm, cloud, completion, desktop_sessions, and more. Full list in [README](https://github.com/iamromulan/tiny-tailscale#readme). Build tags generated automatically by \`cmd/featuretags --min\` with dependency resolution.
+
+          ### Install
+          \`\`\`sh
+          tar xzf tiny-tailscale_${VERSION_NUM}_<arch>.tgz
+          cp tiny-tailscale_${VERSION_NUM}_<arch>/tailscaled /usr/sbin/
+          cp tiny-tailscale_${VERSION_NUM}_<arch>/tailscale /usr/bin/
+          \`\`\`" \
+            artifacts/tiny-tailscale_*.tgz
