@@ -135,7 +135,7 @@ jobs:
         run: |
           TAGS=$(CGO_ENABLED=0 go run ./cmd/featuretags \
             --min \
-            --add=cli,ssh,serve,taildrop,advertiseexitnode,useexitnode,advertiseroutes,useroutes,doctor,syspolicy,cliconndiag,colorable,relayserver,osrouter,health,portmapper,iptables,listenrawdisco,cachenetmap,wakeonlan,gro,linkspeed,tundevstats)
+            --add=cli,ssh,serve,taildrop,advertiseexitnode,useexitnode,advertiseroutes,useroutes,doctor,syspolicy,clientmetrics,cliconndiag,colorable,relayserver,osrouter,health,portmapper,iptables,listenrawdisco,cachenetmap,wakeonlan,gro,linkspeed,tundevstats)
           echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
           echo "Build tags: ${TAGS}"
 
@@ -196,8 +196,8 @@ jobs:
 
           **Single binary** — symlink or rename to \`tailscale\` for CLI mode, or set \`TS_BE_CLI=1\`.
 
-          ### Included (23 features + auto-resolved dependencies)
-          cli, ssh, serve/funnel, taildrop, exit node (advertise + use), route advertising + use, doctor, syspolicy, cliconndiag, colorable, relayserver, osrouter, health, portmapper, iptables, listenrawdisco, cachenetmap, wakeonlan, gro, linkspeed, tundevstats
+          ### Included (24 features + auto-resolved dependencies)
+          cli, ssh, serve/funnel, taildrop, exit node (advertise + use), route advertising + use, doctor, syspolicy, clientmetrics, cliconndiag, colorable, relayserver, osrouter, health, portmapper, iptables, listenrawdisco, cachenetmap, wakeonlan, gro, linkspeed, tundevstats
 
           ### Stripped
           Everything else — aws, kube, bird, webclient, debugeventbus, dns, capture, tap, tpm, cloud, completion, desktop_sessions, and more. Full list in [README](https://github.com/iamromulan/tiny-tailscale#readme). Build tags generated automatically by \`cmd/featuretags --min\` with dependency resolution.

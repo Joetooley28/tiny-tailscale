@@ -34,7 +34,7 @@ Features are stripped using tailscale's built-in `cmd/featuretags` tool with `--
 Binaries are built with `-s -w` (symbol and DWARF stripping) and `-trimpath`. Feature selection uses dependency resolution — if a kept feature requires another feature, it's automatically included.
 
 <details>
-<summary><b>Included features (23 + auto-resolved dependencies)</b></summary>
+<summary><b>Included features (24 + auto-resolved dependencies)</b></summary>
 
 | Feature | Description |
 |---|---|
@@ -48,6 +48,7 @@ Binaries are built with `-s -w` (symbol and DWARF stripping) and `-trimpath`. Fe
 | useroutes | Use routes advertised by other nodes |
 | doctor | Diagnose issues with Tailscale and its host |
 | syspolicy | System policy / MDM configuration |
+| clientmetrics | Client metrics support (required by syspolicy) |
 | cliconndiag | CLI connection error diagnostics |
 | colorable | Colorized terminal output |
 | relayserver | DERP relay capability |
@@ -79,7 +80,6 @@ Dependencies auto-resolved: c2n, dbus, netstack, peerapiclient, peerapiserver
 | bird | Bird BGP integration |
 | captiveportal | Captive portal detection |
 | capture | Packet capture |
-| clientmetrics | Client metrics support |
 | clientupdate | Client auto-update support |
 | cloud | Cloud environment detection |
 | completion | CLI shell completion |
