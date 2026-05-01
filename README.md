@@ -34,7 +34,7 @@ Features are stripped using tailscale's built-in `cmd/featuretags` tool with `--
 Binaries are built with `-s -w` (symbol and DWARF stripping) and `-trimpath`. Feature selection uses dependency resolution — if a kept feature requires another feature, it's automatically included.
 
 <details>
-<summary><b>Included features (24 + auto-resolved dependencies)</b></summary>
+<summary><b>Included features (25 + auto-resolved dependencies)</b></summary>
 
 | Feature | Description |
 |---|---|
@@ -62,6 +62,7 @@ Binaries are built with `-s -w` (symbol and DWARF stripping) and `-trimpath`. Fe
 | gro | Generic Receive Offload for better throughput |
 | linkspeed | Set TUN device link speed for OS routing/QoS |
 | tundevstats | Poll TUN device traffic statistics |
+| unixsocketidentity | Unix socket identity for LocalAPI authentication |
 
 Dependencies auto-resolved: c2n, dbus, netstack, peerapiclient, peerapiserver
 
@@ -111,7 +112,6 @@ Dependencies auto-resolved: c2n, dbus, netstack, peerapiclient, peerapiserver
 | tailnetlock | Tailnet Lock (network key signing) |
 | tap | Layer 2 (ethernet) support |
 | tpm | TPM support |
-| unixsocketidentity | Differentiate LocalAPI users over unix sockets |
 | useproxy | Use system proxies to reach Tailscale servers |
 | usermetrics | User-facing metrics |
 | webclient | Web client UI |
