@@ -31,9 +31,11 @@ jobs:
             exit 0
           fi
 
-          # Get latest stable tag from upstream (even minor = stable)
-          LATEST=$(git ls-remote --tags https://github.com/tailscale/tailscale.git | \
-            grep -oP 'refs/tags/v\K[0-9]+\.[0-9]+\.[0-9]+$' | \
+          # Get latest stable RELEASE from upstream (even minor = stable)
+          # Uses gh release list, not git tags — tags can exist without a release
+          LATEST=$(gh release list --repo tailscale/tailscale --limit 100 \
+            --json tagName --jq '.[].tagName' | \
+            grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+$' | \
             awk -F. '$2 % 2 == 0' | \
             sort -V | tail -1)
 
