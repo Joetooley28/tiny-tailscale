@@ -114,11 +114,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch upstream tags and checkout release
+      - name: Fetch upstream release and checkout
         run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
           git remote add upstream https://github.com/tailscale/tailscale.git || true
-          git fetch upstream --tags
-          git checkout "${{ needs.check-version.outputs.version }}"
+          git fetch upstream tag "$VERSION" --no-tags
+          git checkout "$VERSION"
 
       - name: Setup Go
         uses: actions/setup-go@v5
