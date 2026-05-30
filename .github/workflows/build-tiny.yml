@@ -68,45 +68,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: 386
-            goos: linux
-            goarch: 386
-            goextra: ""
-          - arch: amd64
-            goos: linux
-            goarch: amd64
-            goextra: ""
           - arch: arm
             goos: linux
             goarch: arm
-            goextra: ""
-          - arch: arm64
-            goos: linux
-            goarch: arm64
-            goextra: ""
-          - arch: geode
-            goos: linux
-            goarch: 386
-            goextra: "GO386=softfloat"
-          - arch: mips
-            goos: linux
-            goarch: mips
-            goextra: "GOMIPS=softfloat"
-          - arch: mips64
-            goos: linux
-            goarch: mips64
-            goextra: ""
-          - arch: mips64le
-            goos: linux
-            goarch: mips64le
-            goextra: ""
-          - arch: mipsle
-            goos: linux
-            goarch: mipsle
-            goextra: "GOMIPS=softfloat"
-          - arch: riscv64
-            goos: linux
-            goarch: riscv64
             goextra: ""
     steps:
       - name: Checkout
@@ -138,7 +102,7 @@ jobs:
         run: |
           TAGS=$(CGO_ENABLED=0 go run ./cmd/featuretags \
             --min \
-            --add=cli,ssh,serve,taildrop,advertiseexitnode,useexitnode,advertiseroutes,useroutes,doctor,syspolicy,clientmetrics,cliconndiag,colorable,relayserver,osrouter,health,portmapper,iptables,listenrawdisco,cachenetmap,wakeonlan,gro,linkspeed,tundevstats,unixsocketidentity)
+            --add=cli,ssh,serve,taildrop,advertiseexitnode,useexitnode,advertiseroutes,useroutes,doctor,syspolicy,clientmetrics,cliconndiag,colorable,relayserver,osrouter,health,portmapper,iptables,listenrawdisco,cachenetmap,wakeonlan,gro,linkspeed,tundevstats,unixsocketidentity,ipnbus)
           echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
           echo "Build tags: ${TAGS}"
 
@@ -199,7 +163,7 @@ jobs:
 
           **Single binary** — symlink or rename to \`tailscale\` for CLI mode, or set \`TS_BE_CLI=1\`.
 
-          ### Included (25 features + auto-resolved dependencies)
+          ### Included (26 features incl. ipnbus + auto-resolved dependencies)
           cli, ssh, serve/funnel, taildrop, exit node (advertise + use), route advertising + use, doctor, syspolicy, clientmetrics, cliconndiag, colorable, relayserver, osrouter, health, portmapper, iptables, listenrawdisco, cachenetmap, wakeonlan, gro, linkspeed, tundevstats, unixsocketidentity
 
           ### Stripped
