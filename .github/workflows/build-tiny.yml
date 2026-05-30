@@ -82,7 +82,7 @@ jobs:
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
           git remote add upstream https://github.com/tailscale/tailscale.git || true
-          git fetch upstream tag "$VERSION" --no-tags
+          git fetch upstream tag "$VERSION" --no-tags --force
           git checkout "$VERSION"
 
       - name: Setup Go
