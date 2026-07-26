@@ -128,15 +128,15 @@ No manual intervention needed — releases appear automatically within 24 hours 
 
 ## Install
 
-Replace `<arch>` with `arm` for ARMv7/`armv7l` devices such as RM520N/CFW-3212, or `arm64` for ARMv8-A/`aarch64` devices such as RM551E-GL. Download and install only the archive matching the device.
+Replace `<ver>` with the exact version from the release page and `<arch>` with `arm` for ARMv7/`armv7l` devices such as RM520N/CFW-3212, or `arm64` for ARMv8-A/`aarch64` devices such as RM551E-GL. The version must match in the archive filename and extracted directory; for release `v1.98.9`, use `1.98.9` throughout. Download and install only the archive matching the device.
 
 ```sh
 # Download and extract
-tar xzf tiny-tailscale_1.96.4_arm64.tgz
+tar xzf tiny-tailscale_<ver>_<arch>.tgz
 
 # Copy to system
-cp tiny-tailscale_1.96.4_arm64/tailscaled /usr/sbin/
-cp -P tiny-tailscale_1.96.4_arm64/tailscale /usr/bin/
+cp tiny-tailscale_<ver>_<arch>/tailscaled /usr/sbin/
+cp -P tiny-tailscale_<ver>_<arch>/tailscale /usr/bin/
 
 # Start
 tailscaled &
