@@ -72,6 +72,10 @@ jobs:
             goos: linux
             goarch: arm
             goextra: ""
+          - arch: arm64
+            goos: linux
+            goarch: arm64
+            goextra: ""
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -154,25 +158,51 @@ jobs:
           VERSION: ${{ needs.check-version.outputs.version }}
         run: |
           VERSION_NUM="${VERSION#v}"
-          gh release create "${VERSION}" \
-            --repo "${{ github.repository }}" \
-            --title "tiny-tailscale ${VERSION_NUM}" \
-            --notes "## tiny-tailscale ${VERSION_NUM}
+          cat > release-notes.md <<EOF
+          ## tiny-tailscale ${VERSION_NUM}
 
           Stripped combined binary built from upstream [tailscale ${VERSION}](https://github.com/tailscale/tailscale/releases/tag/${VERSION}).
 
           **Single binary** — symlink or rename to \`tailscale\` for CLI mode, or set \`TS_BE_CLI=1\`.
 
+          ### Choose one architecture download
+          This release contains two separate archives. Download **one** file matching the device architecture:
+
+          - \`tiny-tailscale_${VERSION_NUM}_arm.tgz\` — ARMv7 32-bit (\`armv7l\`, including RM520N/CFW-3212)
+          - \`tiny-tailscale_${VERSION_NUM}_arm64.tgz\` — ARMv8-A 64-bit (\`aarch64\`, including RM551E-GL)
+
+          These are separate architecture builds; users do not need both files. Check with \`uname -m\` if unsure.
+
+          ### Difference from iamromulan/tiny-tailscale
+          This fork fetches the same upstream Tailscale source. The functional change is that it adds the \`ipnbus\` feature, which is required for interactive \`tailscale up\` to return the browser authorization URL. The workflow is focused on publishing the ARMv7 and ARM64 builds used by these modem targets.
+
           ### Included (26 features incl. ipnbus + auto-resolved dependencies)
-          cli, ssh, serve/funnel, taildrop, exit node (advertise + use), route advertising + use, doctor, syspolicy, clientmetrics, cliconndiag, colorable, relayserver, osrouter, health, portmapper, iptables, listenrawdisco, cachenetmap, wakeonlan, gro, linkspeed, tundevstats, unixsocketidentity
+          cli, ssh, serve/funnel, taildrop, exit node (advertise + use), route advertising + use, doctor, syspolicy, clientmetrics, cliconndiag, colorable, relayserver, osrouter, health, portmapper, iptables, listenrawdisco, cachenetmap, wakeonlan, gro, linkspeed, tundevstats, unixsocketidentity, ipnbus
 
           ### Stripped
-          Everything else — aws, kube, bird, webclient, debugeventbus, dns, capture, tap, tpm, cloud, completion, desktop_sessions, and more. Full list in [README](https://github.com/iamromulan/tiny-tailscale#readme). Build tags generated automatically by \`cmd/featuretags --min\` with dependency resolution.
+          Everything else — aws, kube, bird, webclient, debugeventbus, dns, capture, tap, tpm, cloud, completion, desktop_sessions, and more. Full list in [README](https://github.com/Joetooley28/tiny-tailscale#readme). Build tags generated automatically by \`cmd/featuretags --min\` with dependency resolution.
 
           ### Install
           \`\`\`sh
           tar xzf tiny-tailscale_${VERSION_NUM}_<arch>.tgz
           cp tiny-tailscale_${VERSION_NUM}_<arch>/tailscaled /usr/sbin/
           cp tiny-tailscale_${VERSION_NUM}_<arch>/tailscale /usr/bin/
-          \`\`\`" \
-            artifacts/tiny-tailscale_*.tgz
+          \`\`\`
+          EOF
+
+          if gh release view "${VERSION}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release edit "${VERSION}" \
+              --repo "${{ github.repository }}" \
+              --title "tiny-tailscale ${VERSION_NUM}" \
+              --notes-file release-notes.md
+            gh release upload "${VERSION}" \
+              --repo "${{ github.repository }}" \
+              --clobber \
+              artifacts/tiny-tailscale_*.tgz
+          else
+            gh release create "${VERSION}" \
+              --repo "${{ github.repository }}" \
+              --title "tiny-tailscale ${VERSION_NUM}" \
+              --notes-file release-notes.md \
+              artifacts/tiny-tailscale_*.tgz
+          fi

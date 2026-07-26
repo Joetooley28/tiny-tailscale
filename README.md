@@ -6,20 +6,12 @@ This repo contains no Tailscale source code — only a CI pipeline and this READ
 
 ## Downloads
 
-Grab the latest build from [**Releases**](https://github.com/iamromulan/tiny-tailscale/releases).
+Grab the latest build from [**Releases**](https://github.com/Joetooley28/tiny-tailscale/releases).
 
 | Architecture | File | Notes |
 |---|---|---|
-| amd64 | `tiny-tailscale_<ver>_amd64.tgz` | x86-64 |
-| 386 | `tiny-tailscale_<ver>_386.tgz` | x86 32-bit |
-| arm64 | `tiny-tailscale_<ver>_arm64.tgz` | AArch64 (Qualcomm modems, RPi 3+, etc.) |
-| arm | `tiny-tailscale_<ver>_arm.tgz` | ARMv7 32-bit |
-| mips | `tiny-tailscale_<ver>_mips.tgz` | MIPS big-endian softfloat |
-| mipsle | `tiny-tailscale_<ver>_mipsle.tgz` | MIPS little-endian softfloat |
-| mips64 | `tiny-tailscale_<ver>_mips64.tgz` | MIPS64 big-endian |
-| mips64le | `tiny-tailscale_<ver>_mips64le.tgz` | MIPS64 little-endian |
-| riscv64 | `tiny-tailscale_<ver>_riscv64.tgz` | RISC-V 64-bit |
-| geode | `tiny-tailscale_<ver>_geode.tgz` | x86 softfloat (Geode/i486 SoCs) |
+| arm64 | `tiny-tailscale_<ver>_arm64.tgz` | ARMv8-A 64-bit (including RM551E-GL) |
+| arm | `tiny-tailscale_<ver>_arm.tgz` | ARMv7 32-bit (including RM520N/CFW-3212) |
 
 ## What's different from official tailscale?
 
@@ -34,7 +26,7 @@ Features are stripped using tailscale's built-in `cmd/featuretags` tool with `--
 Binaries are built with `-s -w` (symbol and DWARF stripping) and `-trimpath`. Feature selection uses dependency resolution — if a kept feature requires another feature, it's automatically included.
 
 <details>
-<summary><b>Included features (25 + auto-resolved dependencies)</b></summary>
+<summary><b>Included features (26 + auto-resolved dependencies)</b></summary>
 
 | Feature | Description |
 |---|---|
@@ -63,6 +55,7 @@ Binaries are built with `-s -w` (symbol and DWARF stripping) and `-trimpath`. Fe
 | linkspeed | Set TUN device link speed for OS routing/QoS |
 | tundevstats | Poll TUN device traffic statistics |
 | unixsocketidentity | Unix socket identity for LocalAPI authentication |
+| ipnbus | IPN notification bus; required for interactive browser login URLs |
 
 Dependencies auto-resolved: c2n, dbus, netstack, peerapiclient, peerapiserver
 
@@ -94,7 +87,6 @@ Dependencies auto-resolved: c2n, dbus, netstack, peerapiclient, peerapiserver
 | drive | Tailscale Drive (file server) |
 | hujsonconf | HuJSON config file support |
 | identityfederation | Auth key gen via identity federation |
-| ipnbus | IPN notification bus |
 | kube | Kubernetes integration |
 | linuxdnsfight | Linux DNS fight detection |
 | logtail | Upload logs to log.tailscale.com |
@@ -129,8 +121,8 @@ A GitHub Actions workflow runs daily, checking upstream `tailscale/tailscale` fo
 
 1. Syncs the tag from upstream
 2. Generates optimized build tags via `cmd/featuretags --min --add=<kept features>`
-3. Cross-compiles for all 10 architectures
-4. Creates a GitHub Release with all tarballs
+3. Cross-compiles ARMv7 (`arm`) and ARMv8-A 64-bit (`arm64`)
+4. Creates one GitHub Release containing both architecture tarballs
 
 No manual intervention needed — releases appear automatically within 24 hours of an upstream stable release.
 
@@ -151,12 +143,16 @@ tailscale up
 
 For OpenWrt/embedded systems, these binaries are designed to be packaged into `.ipk` files with proper init scripts. See [quectel-rgmii-toolkit](https://github.com/iamromulan/quectel-rgmii-toolkit) for an example.
 
+### This fork
+
+This fork keeps the build focused on ARM modem targets and adds the `ipnbus` feature that the upstream tiny build omits. `ipnbus` is needed for interactive `tailscale up` to return the browser authorization URL. Use the `arm` artifact for ARMv7 devices such as RM520N/CFW-3212, and the `arm64` artifact for ARMv8-A devices such as RM551E-GL.
+
 ## Upstream
 
 This repo is a fork of [tailscale/tailscale](https://github.com/tailscale/tailscale) used purely as a CI and release host. No source code is stored here — the workflow fetches upstream tags directly at build time. This repo contains only the CI workflow, this README, and the upstream license.
 
 - **Issues with tailscale itself** → [tailscale/tailscale issues](https://github.com/tailscale/tailscale/issues)
-- **Issues with the tiny builds** → [tiny-tailscale issues](https://github.com/iamromulan/tiny-tailscale/issues)
+- **Issues with the tiny builds** → [tiny-tailscale issues](https://github.com/Joetooley28/tiny-tailscale/issues)
 - **Tailscale docs** → [tailscale.com/kb](https://tailscale.com/kb/)
 
 ## Legal
