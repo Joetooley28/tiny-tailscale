@@ -130,6 +130,8 @@ No manual intervention needed — releases appear automatically within 24 hours 
 
 Replace `<ver>` with the exact version from the release page and `<arch>` with `arm` for ARMv7/`armv7l` devices such as RM520N/CFW-3212, or `arm64` for ARMv8-A/`aarch64` devices such as RM551E-GL. The version must match in the archive filename and extracted directory; for release `v1.98.9`, use `1.98.9` throughout. Download and install only the archive matching the device.
 
+The `/usr/sbin` and `/usr/bin` destinations below are conventional Linux examples, not required paths. Use writable, persistent locations appropriate to the firmware. On Casa, use the QManager/Casa install layout under `/usrdata` rather than trying to write into the read-only squashfs filesystem.
+
 ```sh
 # Download and extract
 tar xzf tiny-tailscale_<ver>_<arch>.tgz
