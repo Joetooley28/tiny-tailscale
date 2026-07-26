@@ -17,7 +17,7 @@ Grab the latest build from [**Releases**](https://github.com/Joetooley28/tiny-ta
 
 ### Single combined binary
 
-Each release is a **single `tailscaled` binary** with the CLI built in (`ts_include_cli`). A `tailscale` symlink is included — when invoked as `tailscale` (or with `TS_BE_CLI=1`), it runs as the CLI client. No need for two separate binaries.
+The archive is **ready to use**: it includes the `tailscaled` daemon and the `tailscale` command. They share one underlying executable, but users do not need to rename files, create links, or set `TS_BE_CLI`.
 
 ### Stripped for size
 

@@ -163,7 +163,7 @@ jobs:
 
           Stripped combined binary built from upstream [tailscale ${VERSION}](https://github.com/tailscale/tailscale/releases/tag/${VERSION}).
 
-          **Single binary** — symlink or rename to \`tailscale\` for CLI mode, or set \`TS_BE_CLI=1\`.
+          **Ready to use:** the archive includes both the \`tailscaled\` daemon and the \`tailscale\` command. They share one underlying executable, but users do not need to rename files or set \`TS_BE_CLI\`.
 
           ### Choose one architecture download
           This release contains two separate archives. Download **one** file matching the device architecture:
