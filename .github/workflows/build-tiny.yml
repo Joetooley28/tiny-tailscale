@@ -183,10 +183,16 @@ jobs:
           Everything else — aws, kube, bird, webclient, debugeventbus, dns, capture, tap, tpm, cloud, completion, desktop_sessions, and more. Full list in [README](https://github.com/Joetooley28/tiny-tailscale#readme). Build tags generated automatically by \`cmd/featuretags --min\` with dependency resolution.
 
           ### Install
+          Replace \`<arch>\` with \`arm\` for ARMv7/\`armv7l\` devices such as RM520N/CFW-3212, or \`arm64\` for ARMv8-A/\`aarch64\` devices such as RM551E-GL. Download and install only the archive matching the device.
           \`\`\`sh
           tar xzf tiny-tailscale_${VERSION_NUM}_<arch>.tgz
           cp tiny-tailscale_${VERSION_NUM}_<arch>/tailscaled /usr/sbin/
           cp tiny-tailscale_${VERSION_NUM}_<arch>/tailscale /usr/bin/
+          \`\`\`
+
+          For a quick start and browser login flow:
+          \`\`\`sh
+          tailscaled >/tmp/tailscaled.log 2>&1 & sleep 1; tailscale up
           \`\`\`
           EOF
 

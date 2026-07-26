@@ -128,6 +128,8 @@ No manual intervention needed — releases appear automatically within 24 hours 
 
 ## Install
 
+Replace `<arch>` with `arm` for ARMv7/`armv7l` devices such as RM520N/CFW-3212, or `arm64` for ARMv8-A/`aarch64` devices such as RM551E-GL. Download and install only the archive matching the device.
+
 ```sh
 # Download and extract
 tar xzf tiny-tailscale_1.96.4_arm64.tgz
@@ -139,6 +141,12 @@ cp -P tiny-tailscale_1.96.4_arm64/tailscale /usr/bin/
 # Start
 tailscaled &
 tailscale up
+```
+
+For a quick start and browser login flow:
+
+```sh
+tailscaled >/tmp/tailscaled.log 2>&1 & sleep 1; tailscale up
 ```
 
 For OpenWrt/embedded systems, these binaries are designed to be packaged into `.ipk` files with proper init scripts. See [quectel-rgmii-toolkit](https://github.com/iamromulan/quectel-rgmii-toolkit) for an example.
