@@ -106,7 +106,7 @@ jobs:
         run: |
           TAGS=$(CGO_ENABLED=0 go run ./cmd/featuretags \
             --min \
-            --add=cli,ssh,serve,taildrop,advertiseexitnode,useexitnode,advertiseroutes,useroutes,doctor,syspolicy,clientmetrics,cliconndiag,colorable,relayserver,osrouter,health,portmapper,iptables,listenrawdisco,cachenetmap,wakeonlan,gro,linkspeed,tundevstats,unixsocketidentity,ipnbus)
+            --add=cli,ssh,serve,taildrop,advertiseexitnode,useexitnode,advertiseroutes,useroutes,doctor,syspolicy,clientmetrics,cliconndiag,colorable,relayserver,osrouter,health,portmapper,iptables,listenrawdisco,cachenetmap,wakeonlan,gro,linkspeed,tundevstats,unixsocketidentity,ipnbus,dns)
           echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
           echo "Build tags: ${TAGS}"
 
@@ -174,13 +174,13 @@ jobs:
           These are separate architecture builds; users do not need both files. Check with \`uname -m\` if unsure.
 
           ### Difference from iamromulan/tiny-tailscale
-          This fork fetches the same upstream Tailscale source. The functional change is that it adds the \`ipnbus\` feature, which is required for interactive \`tailscale up\` to return the browser authorization URL. The workflow is focused on publishing the ARMv7 and ARM64 builds used by these modem targets.
+          This fork fetches the same upstream Tailscale source. The functional changes are that it adds the \`ipnbus\` feature, which is required for interactive \`tailscale up\` to return the browser authorization URL, and keeps the \`dns\` feature, without which tailscaled crashes (nil pointer in \`net/dns.(*Manager).Query\`) when a MagicDNS query reaches 100.100.100.100. The workflow is focused on publishing the ARMv7 and ARM64 builds used by these modem targets.
 
-          ### Included (26 features incl. ipnbus + auto-resolved dependencies)
-          cli, ssh, serve/funnel, taildrop, exit node (advertise + use), route advertising + use, doctor, syspolicy, clientmetrics, cliconndiag, colorable, relayserver, osrouter, health, portmapper, iptables, listenrawdisco, cachenetmap, wakeonlan, gro, linkspeed, tundevstats, unixsocketidentity, ipnbus
+          ### Included (27 features incl. ipnbus and dns + auto-resolved dependencies)
+          cli, ssh, serve/funnel, taildrop, exit node (advertise + use), route advertising + use, doctor, syspolicy, clientmetrics, cliconndiag, colorable, relayserver, osrouter, health, portmapper, iptables, listenrawdisco, cachenetmap, wakeonlan, gro, linkspeed, tundevstats, unixsocketidentity, ipnbus, dns
 
           ### Stripped
-          Everything else — aws, kube, bird, webclient, debugeventbus, dns, capture, tap, tpm, cloud, completion, desktop_sessions, and more. Full list in [README](https://github.com/Joetooley28/tiny-tailscale#readme). Build tags generated automatically by \`cmd/featuretags --min\` with dependency resolution.
+          Everything else — aws, kube, bird, webclient, debugeventbus, capture, tap, tpm, cloud, completion, desktop_sessions, and more. Full list in [README](https://github.com/Joetooley28/tiny-tailscale#readme). Build tags generated automatically by \`cmd/featuretags --min\` with dependency resolution.
 
           ### Install
           Replace \`<ver>\` with the exact version from this release and \`<arch>\` with \`arm\` for ARMv7/\`armv7l\` devices such as RM520N/CFW-3212, or \`arm64\` for ARMv8-A/\`aarch64\` devices such as RM551E-GL. The version must match in the archive filename and extracted directory; for this release, use \`${VERSION_NUM}\` throughout. Download and install only the archive matching the device.

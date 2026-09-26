@@ -26,7 +26,7 @@ Features are stripped using tailscale's built-in `cmd/featuretags` tool with `--
 Binaries are built with `-s -w` (symbol and DWARF stripping) and `-trimpath`. Feature selection uses dependency resolution — if a kept feature requires another feature, it's automatically included.
 
 <details>
-<summary><b>Included features (26 + auto-resolved dependencies)</b></summary>
+<summary><b>Included features (27 + auto-resolved dependencies)</b></summary>
 
 | Feature | Description |
 |---|---|
@@ -56,6 +56,7 @@ Binaries are built with `-s -w` (symbol and DWARF stripping) and `-trimpath`. Fe
 | tundevstats | Poll TUN device traffic statistics |
 | unixsocketidentity | Unix socket identity for LocalAPI authentication |
 | ipnbus | IPN notification bus; required for interactive browser login URLs |
+| dns | MagicDNS and system DNS configuration (kept: without it tailscaled panics on MagicDNS queries) |
 
 Dependencies auto-resolved: c2n, dbus, netstack, peerapiclient, peerapiserver
 
@@ -83,7 +84,6 @@ Dependencies auto-resolved: c2n, dbus, netstack, peerapiclient, peerapiserver
 | debugeventbus | Eventbus debug support |
 | debugportmapper | Portmapper debug support |
 | desktop_sessions | Desktop sessions support |
-| dns | MagicDNS and system DNS configuration |
 | drive | Tailscale Drive (file server) |
 | hujsonconf | HuJSON config file support |
 | identityfederation | Auth key gen via identity federation |
@@ -155,7 +155,7 @@ For OpenWrt/embedded systems, these binaries are designed to be packaged into `.
 
 ### This fork
 
-This fork keeps the build focused on ARM modem targets and adds the `ipnbus` feature that the upstream tiny build omits. `ipnbus` is needed for interactive `tailscale up` to return the browser authorization URL. Use the `arm` artifact for ARMv7 devices such as RM520N/CFW-3212, and the `arm64` artifact for ARMv8-A devices such as RM551E-GL.
+This fork keeps the build focused on ARM modem targets and adds the `ipnbus` and `dns` features that the upstream tiny build omits. `ipnbus` is needed for interactive `tailscale up` to return the browser authorization URL. `dns` is kept because netstack still routes MagicDNS (100.100.100.100:53) queries to the DNS manager; with `dns` stripped that manager is nil and tailscaled panics and crash-loops (~+0.4 MB binary). Use the `arm` artifact for ARMv7 devices such as RM520N/CFW-3212, and the `arm64` artifact for ARMv8-A devices such as RM551E-GL.
 
 ## Upstream
 
